@@ -25,6 +25,7 @@ function saveBookmark(e){
     // init array
     var bookmarks = [];
 
+
     // add values to array
     bookmarks.push(bookmark);
 
@@ -41,4 +42,28 @@ function saveBookmark(e){
   }
   // prevent form from submitting
   e.preventDefault();
+}
+
+function fetchBookmarks() {
+    // take data from storage
+    var bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
+    // set the variable
+    var bookmarksResults = document.getElementById('bookmarksResults');
+
+    for (i=0; i < bookmarks.length; i++) {
+      var name = bookmarks[i].name;
+      var url = bookmarks[i].url;
+
+      bookmarksResults.innerHTML += '<div class="card-header"> <h3>' + name + "</h3>" +
+                                    '<p>' + url + '</p>' + '<a href="http://' + url + '"class="btn btn-primary">Visit</a>' +
+                                    '<button type="button" class="btn btn-danger" onclick="removeFromList(\''+url+'\')">Remove</button>'
+                                    "</div>";
+
+    function removeFromList(n) {
+
+    }
+  }
+
+
+
 }
