@@ -10,7 +10,7 @@ function saveBookmark(e){
   var bookmark = {
     name: siteName,
     url: siteURL
-  }
+  };
 
   /*
     // loca storage test
@@ -40,8 +40,32 @@ function saveBookmark(e){
     // stringify array and store to localStorage
     localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
   }
+
+  // Clear form
+  document.getElementById('myForm').reset();
+
+  fetchBookmarks();
   // prevent form from submitting
   e.preventDefault();
+}
+
+// defining function for removing of bookmark
+function removeFromList(u) {
+  // localStorage.removeItem('bookmarks', bookmarks[u]); wrong
+  var bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
+  // loop thgough bookmarks
+  for (i=0; i<bookmarks.length; i++) {
+    // if 'u' is equal to the url of the current item in the for loop in fetchBookmarks()
+    if (u == bookmarks[i].url) {
+      bookmarks.splice(i, 1);
+    }
+  }
+  // re set the rest of data in storage
+  localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+
+  // re call fetchBookmarks()
+  fetchBookmarks();
+
 }
 
 function fetchBookmarks() {
@@ -50,20 +74,21 @@ function fetchBookmarks() {
     // set the variable
     var bookmarksResults = document.getElementById('bookmarksResults');
 
+    // to reset the HTML to blank, otherwise the previous HTML remains and appends with the next
+    bookmarksResults.innerHTML = '';
+
     for (i=0; i < bookmarks.length; i++) {
       var name = bookmarks[i].name;
       var url = bookmarks[i].url;
 
-      bookmarksResults.innerHTML += '<div class="card-header"> <h3>' + name + "</h3>" +
+
+
+      bookmarksResults.innerHTML += '<div class="card-header" id="results"> <h3>' + name + "</h3>" +
                                     '<p>' + url + '</p>' + '<a href="http://' + url + '"class="btn btn-primary">Visit</a>' +
                                     '<button type="button" class="btn btn-danger" onclick="removeFromList(\''+url+'\')">Remove</button>'
                                     "</div>";
 
-    function removeFromList(n) {
 
-    }
   }
-
-
 
 }
