@@ -1,94 +1,96 @@
-// listen to form submit and run the function
-document.getElementById('myForm').addEventListener('submit', saveBookmark);
+document.getElementById('myForm').addEventListener('submit', saveBookmark); // no parameter needed to call function
 
-// save bookmark
-function saveBookmark(e){
-  // get form values only
-  var siteName = document.getElementById('siteName').value;
-  var siteURL = document.getElementById('siteURL').value;
+function saveBookmark(e) {
 
-  var bookmark = {
-    name: siteName,
-    url: siteURL
-  };
+  var nameSite = document.getElementById('siteName').value;
+  var nameUrl = document.getElementById('siteURL').value; //ok
 
-  /*
-    // loca storage test
-    localStorage.setItem('test', 'Hello world');
-    console.log(localStorage.getItem('test'));
-    localStorage.removeItem('test');
-    console.log(localStorage.getItem('test'));
-  */
+  e.preventDefault(); // if put after validate if statement, return false will reload the page
 
-    // if bookmarks is empty
-  if (localStorage.getItem('bookmarks') === null) {
-    // init array
-    var bookmarks = [];
+  // add http:// if not present
+  if (!/^https?:\/\//i.test(nameUrl)) {
+    nameUrl = 'http://' + nameUrl;
+  }
+
+  // then validate
+  if (!validateForm(nameSite, nameUrl)) {
+    return false;
+  }
+
+  // shouln't make direct objects, then calling values from object will be tedious
+  var bookmarkObj = {
+    name : nameSite,
+    url : nameUrl
+  } //ok
 
 
-    // add values to array
-    bookmarks.push(bookmark);
+   if (localStorage.getItem('bookmarkArray') === null) {
 
-    // stringify array and store to localStorage
-    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+    var bookmarkArray = [];
+
+    bookmarkArray.push(bookmarkObj);
+
+    localStorage.setItem('bookmarkArray', JSON.stringify(bookmarkArray));
   } else {
-    var bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
-
-    // add values to array
-    bookmarks.push(bookmark);
-
-    // stringify array and store to localStorage
-    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+    bookmarkArray = JSON.parse(localStorage.getItem('bookmarkArray'));
+    bookmarkArray.push(bookmarkObj);
+    localStorage.setItem('bookmarkArray', JSON.stringify(bookmarkArray));
+    // always check spelling and give variables easy names
   }
 
-  // Clear form
+  fetchBookmarks();
   document.getElementById('myForm').reset();
-
-  fetchBookmarks();
-  // prevent form from submitting
-  e.preventDefault();
 }
 
-// defining function for removing of bookmark
-function removeFromList(u) {
-  // localStorage.removeItem('bookmarks', bookmarks[u]); wrong
-  var bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
-  // loop thgough bookmarks
-  for (i=0; i<bookmarks.length; i++) {
-    // if 'u' is equal to the url of the current item in the for loop in fetchBookmarks()
-    if (u == bookmarks[i].url) {
-      bookmarks.splice(i, 1);
-    }
-  }
-  // re set the rest of data in storage
-  localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-
-  // re call fetchBookmarks()
-  fetchBookmarks();
-
-}
 
 function fetchBookmarks() {
-    // take data from storage
-    var bookmarks = JSON.parse(localStorage.getItem('bookmarks'));
-    // set the variable
-    var bookmarksResults = document.getElementById('bookmarksResults');
+  var bookmarkArray = JSON.parse(localStorage.getItem('bookmarkArray'));
 
-    // to reset the HTML to blank, otherwise the previous HTML remains and appends with the next
-    bookmarksResults.innerHTML = '';
+  document.getElementById('bookmarksResults').innerHTML = '';
 
-    for (i=0; i < bookmarks.length; i++) {
-      var name = bookmarks[i].name;
-      var url = bookmarks[i].url;
+  for (i=0; i<bookmarkArray.length; i++) {
+    var nameSite = bookmarkArray[i].name;
+    var nameUrl = bookmarkArray[i].url;
 
-
-
-      bookmarksResults.innerHTML += '<div class="card-header" id="results"> <h3>' + name + "</h3>" +
-                                    '<p>' + url + '</p>' + '<a href="http://' + url + '"class="btn btn-primary">Visit</a>' +
-                                    '<button type="button" class="btn btn-danger" onclick="removeFromList(\''+url+'\')">Remove</button>'
-                                    "</div>";
-
-
+    document.getElementById('bookmarksResults').innerHTML += '<div class="card">' +
+                                                            '<div class="card-header">' +
+                                                            '<h3 class="card-title mt-2">' + nameSite + ' ' +
+                                                            '<div class="float-right"><a target="_blank" class="btn btn-light mr-1" href="'+nameUrl+'">Visit</a>' +
+                                                            '<button class="btn btn-danger" onclick="deleteBookmark(\''+nameUrl+'\')">Delete</button></div>'+'<h3>'+
+                                                            '</div></div>';
   }
+}
+
+function deleteBookmark(nameUrl) {
+  var bookmarkArray = JSON.parse(localStorage.getItem('bookmarkArray'));
+
+  for (i=0; i < bookmarkArray.length; i++) {
+    if (nameUrl == bookmarkArray[i].url) {
+
+      bookmarkArray.splice(i, 1); // only i is needed
+
+      localStorage.setItem('bookmarkArray', JSON.stringify(bookmarkArray));
+    }
+  }
+
+  fetchBookmarks();
+}
+
+function validateForm(nameSite, nameUrl) {
+
+  if (!nameSite || !nameUrl) {
+    alert('Please fill in the form');
+    return false;
+  }
+
+  var expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
+  var regex = new RegExp(expression);
+
+  if (!nameUrl.match(regex)) {
+    alert('invalid URL, please try again.');
+    return false;
+  }
+
+  return true;
 
 }
